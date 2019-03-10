@@ -1,56 +1,26 @@
-import makeFilter from './make-filter';
-import makeCard from './make-card';
+import TaskView from './views/task-view';
+import TaskEditView from './views/task-edit-view';
+import FilterView from './views/filter-view';
+import {filtersData, taskData} from './data/data';
 
-const filterBlock = document.querySelector(`.main__filter`);
-const filtersData = [
-  {
-    type: `all`,
-    count: 27,
-    status: `checked`
-  },
-  {
-    type: `overdue`,
-    count: 10,
-    status: `disabled`,
-  },
-  {
-    type: `today`,
-    count: 2,
-    status: `disabled`
-  },
-  {
-    type: `favorites`,
-    count: 3,
-    status: ``
-  },
-  {
-    type: `repeating`,
-    count: 5,
-    status: ``
-  },
-  {
-    type: `tags`,
-    count: 3,
-    status: `disabled`
-  },
-  {
-    type: `all`,
-    count: 4,
-    status: ``
-  }
-];
+const filterContainer = document.querySelector(`.main__filter`);
+const tasksContainer = document.querySelector(`.board__tasks`);
 
-// Make filters
-const filters = filtersData
-  .map((it) => makeFilter(it.type, it.count, it.status))
-  .join(``);
+const taskComponent = new TaskView(taskData);
+const taskEditComponent = new TaskEditView(taskData);
+const filterComponent = new FilterView(filtersData);
 
-filterBlock.insertAdjacentHTML(`beforeend`, filters);
+filterContainer.appendChild(filterComponent.render());
+tasksContainer.appendChild(taskComponent.render());
 
-// Make cards
-const taskBlock = document.querySelector(`.board__tasks`);
-const tasks = new Array(7)
-  .fill(makeCard())
-  .join(``);
+taskComponent.onEdit = () => {
+  taskEditComponent.render();
+  tasksContainer.replaceChild(taskEditComponent.element, taskComponent.element);
+  taskComponent.unrender();
+};
 
-taskBlock.insertAdjacentHTML(`beforeend`, tasks);
+taskEditComponent.onSubmit = () => {
+  taskComponent.render();
+  tasksContainer.replaceChild(taskComponent.element, taskEditComponent.element);
+  taskEditComponent.unrender();
+}

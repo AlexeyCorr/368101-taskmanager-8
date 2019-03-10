@@ -1,4 +1,4 @@
-const task = {
+const taskData = {
   title: [
     `Изучить теорию`,
     `Сделать домашку`,
@@ -33,3 +33,43 @@ const task = {
   isFavorite: new Boolean(Math.round(Math.random())),
   isDone: new Boolean(Math.round(Math.random())),
 };
+
+const filtersData = [
+  {
+    type: `all`,
+    count: 27,
+    status: `checked`
+  },
+  {
+    type: `overdue`,
+    count: 10,
+    status: `disabled`,
+  },
+  {
+    type: `today`,
+    count: 2,
+    status: `disabled`
+  },
+  {
+    type: `favorites`,
+    count: 3,
+    status: ``
+  },
+  {
+    type: `repeating`,
+    count: 5,
+    status: ``
+  },
+  {
+    type: `tags`,
+    count: 3,
+    status: `disabled`
+  },
+  {
+    type: `all`,
+    count: 4,
+    status: ``
+  }
+];
+
+export {taskData, filtersData};
