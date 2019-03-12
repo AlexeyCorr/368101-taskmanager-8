@@ -4,19 +4,21 @@ class FilterView extends AbstractView {
   constructor(data) {
     super();
 
-    this._data = data;
+    this._type = data.type;
+    this._status = data.status;
+    this._count = data.count;
   }
 
   get template() {
     return `
     <input
       type="radio"
-      id="filter__${this._data.type}"
+      id="filter__${this._type}"
       class="filter__input visually-hidden"
       name="filter"
-      ${this._data.status}/>
-    <label for="filter__${this._data.type}" class="filter__label">
-      ${this._data.type}<span class="filter__all-count">${this._data.count}</span>
+      ${this._status}/>
+    <label for="filter__${this._type}" class="filter__label">
+      ${this._type}<span class="filter__all-count">${this._count}</span>
     </label>`
   }
 }
