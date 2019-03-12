@@ -11,7 +11,6 @@ class TaskEditView extends AbstractView {
     this._repeatingDays = data.repeatingDays;
 
     this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
-
     this._onSubmit = null;
   }
 
