@@ -34,3 +34,4 @@ const renderTasks = (data) => {
 
 renderFilter(filtersData);
 renderTasks(tasks);
+
