@@ -28,7 +28,7 @@ const renderTasks = (data) => {
       taskComponent.render();
       tasksContainer.replaceChild(taskComponent.element, taskEditComponent.element);
       taskEditComponent.unrender();
-    }
+    };
   });
 };
 
