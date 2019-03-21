@@ -13,9 +13,9 @@ const renderFilter = (data) => {
 };
 
 const renderTasks = (data) => {
-  data.forEach((it) => {
-    const taskComponent = new TaskView(it);
-    const taskEditComponent = new TaskEditView(it);
+  data.forEach((task) => {
+    const taskComponent = new TaskView(task);
+    const taskEditComponent = new TaskEditView(task);
     tasksContainer.appendChild(taskComponent.render());
 
     taskComponent.onEdit = () => {
@@ -24,7 +24,15 @@ const renderTasks = (data) => {
       taskComponent.unrender();
     };
 
-    taskEditComponent.onSubmit = () => {
+    taskEditComponent.onSubmit = (newData) => {
+      console.log(newData.tags);
+      task.title = newData.title;
+      task.tags = newData.tags;
+      task.color = newData.color;
+      task.repeatingDays = newData.repeatingDays;
+      task.dueDate = newData.dueDate;
+
+      taskComponent.update(task);
       taskComponent.render();
       tasksContainer.replaceChild(taskComponent.element, taskEditComponent.element);
       taskEditComponent.unrender();
@@ -34,4 +42,3 @@ const renderTasks = (data) => {
 
 renderFilter(filtersData);
 renderTasks(tasks);
-

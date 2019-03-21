@@ -1,4 +1,6 @@
 import AbstractView from './../abstract-view';
+import {COLORS} from '../data/data';
+import flatpickr from 'flatpickr';
 
 class TaskEditView extends AbstractView {
   constructor(data) {
@@ -7,20 +9,81 @@ class TaskEditView extends AbstractView {
     this._title = data.title;
     this._dueDate = data.dueDate;
     this._tags = data.tags;
-    this._picture = data.picture;
+    this._color = data.color;
     this._repeatingDays = data.repeatingDays;
 
+    this._state.isDate = false;
+    this._state.isRepeated = Object.entries(this._repeatingDays)
+                                   .some((it) => it[1]);
+
     this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
+    this._onChangeDate = this._onChangeDate.bind(this);
+    this._onChangeRepeated = this._onChangeRepeated.bind(this);
+    this._onRemoveTag = this._onRemoveTag.bind(this);
+
     this._onSubmit = null;
+  }
+
+  _processForm(formData) {
+    const entry = {
+      title: ``,
+      color: ``,
+      tags: new Set(),
+      dueDate: new Date(),
+      repeatingDays: {
+        'mo': false,
+        'tu': false,
+        'we': false,
+        'th': false,
+        'fr': false,
+        'sa': false,
+        'su': false,
+      }
+    };
+
+    const taskEditMapper = TaskEditView.createMapper(entry);
+    for (const pair of formData.entries()) {
+      const [property, value] = pair;
+      taskEditMapper[property] && taskEditMapper[property](value);
+    }
+
+    return entry;
   }
 
   _onSubmitButtonClick(evt) {
     evt.preventDefault();
-    typeof this._onSubmit === `function` && this._onSubmit();
+
+    const formData = new FormData(this._element.querySelector(`.card__form`));
+    const newData = this._processForm(formData);
+    typeof this._onSubmit === `function` && this._onSubmit(newData);
+
+    this.update(newData);
+  }
+
+  _onChangeDate() {
+    this._state.isDate = !this._state.isDate;
+    this.unbind();
+    this._partialUpdate();
+    this.bind();
+  }
+
+  _onChangeRepeated() {
+    this._state.isRepeated = !this._state.isRepeated;
+    this.unbind();
+    this._partialUpdate();
+    this.bind();
+  }
+
+  _onRemoveTag(evt) {
+    evt.target.parentElement.remove();
   }
 
   _isRepeated() {
-    return Object.values(this._repeatingDays).some(it => it === true);
+    return Object.values(this._repeatingDays).some((it) => it === true);
+  }
+
+  _partialUpdate() {
+    this._element.innerHTML = this.template;
   }
 
   set onSubmit(fn) {
@@ -29,7 +92,11 @@ class TaskEditView extends AbstractView {
 
   get template() {
     return `
-    <article class="card card--edit card--blue ${this._isRepeated() ? `card--repeat` : ``}">
+    <article class="card
+                    card--edit
+                    card--${this._color}
+                    ${this._isRepeated() && `card--repeat`}
+    ">
       <form class="card__form" method="get">
         <div class="card__inner">
           <div class="card__control">
@@ -54,10 +121,12 @@ class TaskEditView extends AbstractView {
             <div class="card__details">
               <div class="card__dates">
                 <button class="card__date-deadline-toggle" type="button">
-                  date: <span class="card__date-status">no</span>
+                  date: <span class="card__date-status">
+                    ${this._state.isDate ? `yes` : `no`}
+                  </span>
                 </button>
 
-                <fieldset class="card__date-deadline" disabled>
+                <fieldset class="card__date-deadline" ${!this._state.isDate && `disabled`}>
                   <label class="card__input-deadline-wrap">
                     <input class="card__date" type="text" placeholder="23 September" name="date" />
                   </label>
@@ -68,38 +137,24 @@ class TaskEditView extends AbstractView {
                 </fieldset>
 
                 <button class="card__repeat-toggle" type="button">
-                  repeat: <span class="card__repeat-status">no</span>
+                  repeat: <span class="card__repeat-status">
+                    ${this._state.isRepeated ? `yes` : `no`}
+                  </span>
                 </button>
 
-                <fieldset class="card__repeat-days" disabled>
+                <fieldset class="card__repeat-days" ${!this._state.isRepeated && `disabled`}>
                   <div class="card__repeat-days-inner">
-                    <input class="visually-hidden card__repeat-day-input" type="checkbox" id="repeat-mo-5" name="repeat" value="mo" />
-                    <label class="card__repeat-day" for="repeat-mo-5">mo</label>
-
-                    <input class="visually-hidden card__repeat-day-input" type="checkbox" id="repeat-tu-5" name="repeat" value="tu" checked />
-                    <label class="card__repeat-day" for="repeat-tu-5">tu</label>
-
-                    <input class="visually-hidden card__repeat-day-input" type="checkbox" id="repeat-we-5" name="repeat" value="we" />
-                    <label class="card__repeat-day" for="repeat-we-5" >w</label>
-
-                    <input class="visually-hidden card__repeat-day-input" type="checkbox" id="repeat-th-5" name="repeat" value="th" />
-                    <label class="card__repeat-day" for="repeat-th-5">th</label>
-
-                    <input class="visually-hidden card__repeat-day-input" type="checkbox" id="repeat-fr-5" name="repeat" value="fr" checked />
-                    <label class="card__repeat-day" for="repeat-fr-5" >fr</label>
-
-                    <input class="visually-hidden card__repeat-day-input" type="checkbox" name="repeat" value="sa" id="repeat-sa-5" />
-                    <label class="card__repeat-day" for="repeat-sa-5">sa</label>
-
-                    <input class="visually-hidden card__repeat-day-input" type="checkbox" id="repeat-su-5" name="repeat" value="su" checked />
-                    <label class="card__repeat-day" for="repeat-su-5" >su</label>
+                    ${Object.entries(this._repeatingDays).map((it) => `
+                      <input class="visually-hidden card__repeat-day-input" type="checkbox" id="repeat-${it[0]}-5" name="repeat" value="${it[0]}" ${it[1] && `checked`}/>
+                      <label class="card__repeat-day" for="repeat-${it[0]}-5">${it[0]}</label>
+                    `.trim()).join(``)}
                   </div>
                 </fieldset>
               </div>
 
               <div class="card__hashtag">
                 <div class="card__hashtag-list">
-                  ${(Array.from(this._tags).map((tag) => (`
+                  ${([...this._tags].map((tag) => (`
                     <span class="card__hashtag-inner">
                       <input type="hidden" name="hashtag" value="${tag}" class="card__hashtag-hidden-input" />
                       <button type="button" class="card__hashtag-name">#${tag}</button>
@@ -109,7 +164,7 @@ class TaskEditView extends AbstractView {
                 </div>
 
                 <label>
-                  <input type="text" class="card__hashtag-input" name="hashtag-input" placeholder="Type new hashtag here" />
+                  <input type="text" class="card__hashtag-input" name="hashtag" placeholder="Type new hashtag here" />
                 </label>
               </div>
             </div>
@@ -121,20 +176,10 @@ class TaskEditView extends AbstractView {
             <div class="card__colors-inner">
               <h3 class="card__colors-title">Color</h3>
               <div class="card__colors-wrap">
-                <input type="radio" id="color-black-5" class="card__color-input card__color-input--black visually-hidden" name="color" value="black" />
-                <label for="color-black-5" class="card__color card__color--black">black</label>
-
-                <input type="radio" id="color-yellow-5" class="card__color-input card__color-input--yellow visually-hidden" name="color" value="yellow" />
-                <label for="color-yellow-5" class="card__color card__color--yellow">yellow</label>
-
-                <input type="radio" id="color-blue-5" class="card__color-input card__color-input--blue visually-hidden" name="color" value="blue" />
-                <label for="color-blue-5" class="card__color card__color--blue">blue</label>
-
-                <input type="radio" id="color-green-5" class="card__color-input card__color-input--green visually-hidden" name="color" value="green" checked />
-                <label for="color-green-5" class="card__color card__color--green">green</label>
-
-                <input type="radio" id="color-pink-5" class="card__color-input card__color-input--pink visually-hidden" name="color" value="pink" />
-                <label for="color-pink-5" class="card__color card__color--pink">pink</label>
+                ${COLORS.map((color) => `
+                  <input type="radio" id="color-${color}-5" class="card__color-input card__color-input--${color} visually-hidden" name="color" value="${color}"/>
+                  <label for="color-${color}-5" class="card__color card__color--${color}">${color}</label>`.trim()
+                ).join(``)}
               </div>
             </div>
           </div>
@@ -151,11 +196,51 @@ class TaskEditView extends AbstractView {
   bind() {
     this._element.querySelector(`.card__form`)
         .addEventListener(`submit`, this._onSubmitButtonClick);
+    this._element.querySelector(`.card__date-deadline-toggle`)
+        .addEventListener(`click`, this._onChangeDate);
+    this._element.querySelector(`.card__repeat-toggle`)
+        .addEventListener(`click`, this._onChangeRepeated);
+    this._element.querySelectorAll(`.card__hashtag-delete`)
+        .forEach((it) => it
+        .addEventListener(`click`, this._onRemoveTag));
+
+    if (this._state.isDate) {
+      flatpickr(`.card__date`, { altInput: true, altFormat: `j F`, dateFormat: `j F` });
+      flatpickr(`.card__time`, { enableTime: true, noCalendar: true, altInput: true, altFormat: `h:i K`, dateFormat: `h:i K`});
+    }
   }
 
   unbind() {
     this._element.querySelector(`.card__form`)
         .removeEventListener(`submit`, this._onSubmitButtonClick);
+    this._element.querySelector(`.card__form`)
+        .removeEventListener(`submit`, this._onSubmitButtonClick);
+    this._element.querySelector(`.card__date-deadline-toggle`)
+        .removeEventListener(`click`, this._onChangeDate);
+    this._element.querySelector(`.card__repeat-toggle`)
+        .removeEventListener(`click`, this._onChangeRepeated);
+        this._element.querySelectorAll(`.card__hashtag-delete`)
+        .forEach((it) => it
+        .removeEventListener(`click`, this._onRemoveTag));
+  }
+
+  update(data) {
+    this._title = data.title;
+    this._dueDate = data.dueDate;
+    this._tags = data.tags;
+    this._color = data.color;
+    this._repeatingDays = data.repeatingDays;
+  }
+
+  static createMapper(target) {
+    console.log(target);
+    return {
+      hashtag: (value) => target.tags.add(value),
+      text: (value) => target.title = value,
+      color: (value) => target.color = value,
+      repeat: (value) => target.repeatingDays[value] = true,
+      date: (value) => target.dueDate[value],
+    }
   }
 }
 

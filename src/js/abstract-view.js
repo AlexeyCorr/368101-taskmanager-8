@@ -1,7 +1,7 @@
 const createElement = (template = ``, tagName = `div`) => {
   const wrapper = document.createElement(tagName);
   wrapper.innerHTML = template.trim();
-  return wrapper;
+  return wrapper.firstChild;
 };
 
 class AbstractView {
@@ -41,6 +41,8 @@ class AbstractView {
     this._element.remove();
     this._element = null;
   }
+
+  update() {}
 }
 
 export default AbstractView;

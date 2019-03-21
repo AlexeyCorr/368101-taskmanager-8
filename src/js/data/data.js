@@ -1,5 +1,7 @@
 const MAX_TASKS = 7;
 
+export const COLORS = [`black`, `yellow`, `blue`, `green`, `pink`];
+
 const getTaskData = () => {
   return {
     title: [
