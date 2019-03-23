@@ -1,4 +1,5 @@
 import AbstractView from './../abstract-view';
+import moment from 'moment';
 
 class TaskView extends AbstractView {
   constructor(data) {
@@ -7,6 +8,8 @@ class TaskView extends AbstractView {
     this._title = data.title;
     this._tags = data.tags;
     this._color = data.color;
+    this._dueDate = data.dueDate;
+    console.log(data.dueDate);
     this._repeatingDays = data.repeatingDays;
     this._onEdit = null;
 
@@ -49,6 +52,9 @@ class TaskView extends AbstractView {
 
         <div class="card__settings">
           <div class="card__details">
+            <div class="card__dates">
+              ${moment(this._dueDate).format('Do MMMM h:mm')}
+            </div>
             <div class="card__hashtag">
               <div class="card__hashtag-list">
                 ${[...this._tags].map((tag) => (`

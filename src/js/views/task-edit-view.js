@@ -44,8 +44,11 @@ class TaskEditView extends AbstractView {
     const taskEditMapper = TaskEditView.createMapper(entry);
     for (const pair of formData.entries()) {
       const [property, value] = pair;
+      console.log(pair);
       taskEditMapper[property] && taskEditMapper[property](value);
     }
+
+    console.log(entry);
 
     return entry;
   }
@@ -233,13 +236,13 @@ class TaskEditView extends AbstractView {
   }
 
   static createMapper(target) {
-    console.log(target);
     return {
       hashtag: (value) => target.tags.add(value),
       text: (value) => target.title = value,
       color: (value) => target.color = value,
       repeat: (value) => target.repeatingDays[value] = true,
       date: (value) => target.dueDate[value],
+      time: (value) => target.dueDate[value],
     }
   }
 }
