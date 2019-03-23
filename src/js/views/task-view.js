@@ -1,13 +1,15 @@
 import AbstractView from './../abstract-view';
+import moment from 'moment';
 
 class TaskView extends AbstractView {
   constructor(data) {
     super();
 
     this._title = data.title;
-    this._dueDate = data.dueDate;
     this._tags = data.tags;
-    this._picture = data.picture;
+    this._color = data.color;
+    this._dueDate = data.dueDate;
+    console.log(data.dueDate);
     this._repeatingDays = data.repeatingDays;
     this._onEdit = null;
 
@@ -28,7 +30,7 @@ class TaskView extends AbstractView {
 
   get template() {
     return `
-    <article class="card card--blue ${this._isRepeated() ? `card--repeat` : ``}">
+    <article class="card card--${this._color} ${this._isRepeated() ? `card--repeat` : ``}">
       <div class="card__inner">
         <div class="card__control">
           <button type="button" class="card__btn card__btn--edit">edit</button>
@@ -50,15 +52,16 @@ class TaskView extends AbstractView {
 
         <div class="card__settings">
           <div class="card__details">
+            <div class="card__dates">
+              ${moment(this._dueDate).format('Do MMMM h:mm')}
+            </div>
             <div class="card__hashtag">
               <div class="card__hashtag-list">
-                ${(Array.from(this._tags).map((tag) => (`
+                ${[...this._tags].map((tag) => (`
                   <span class="card__hashtag-inner">
-                    <input type="hidden" name="hashtag" value="${tag}" class="card__hashtag-hidden-input" />
                     <button type="button" class="card__hashtag-name">#${tag}</button>
-                    <button type="button" class="card__hashtag-delete">delete</button>
                   </span>`.trim()
-                ))).join('')}
+                )).join('')}
               </div>
           </div>
      </article>`;
@@ -72,6 +75,13 @@ class TaskView extends AbstractView {
   unbind() {
     this._element.querySelector(`.card__btn--edit`)
         .removeEventListener(`click`, this._onEditButtonClick);
+  }
+
+  update(data) {
+    this._title = data.title;
+    this._tags = data.tags;
+    this._color = data.color;
+    this._repeatingDays = data.repeatingDays;
   }
 }
 
