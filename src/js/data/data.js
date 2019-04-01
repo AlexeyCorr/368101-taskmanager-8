@@ -27,12 +27,12 @@ const getTaskData = () => {
       `pink`,
     ][Math.floor(Math.random() * 5)],
     repeatingDays: {
-      'mo': true,
+      'mo': false,
       'tu': false,
-      'we': true,
+      'we': false,
       'th': false,
       'fr': false,
-      'sa': true,
+      'sa': false,
       'su': false,
     },
     isFavorite: new Boolean(Math.round(Math.random())),
@@ -49,12 +49,12 @@ const filtersData = [
   {
     type: `overdue`,
     count: 10,
-    status: `disabled`,
+    status: ``,
   },
   {
     type: `today`,
     count: 2,
-    status: `disabled`
+    status: ``
   },
   {
     type: `favorites`,
@@ -72,9 +72,9 @@ const filtersData = [
     status: `disabled`
   },
   {
-    type: `all`,
+    type: `archive`,
     count: 4,
-    status: ``
+    status: `disabled`
   }
 ];
 

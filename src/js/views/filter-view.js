@@ -7,6 +7,18 @@ class FilterView extends AbstractView {
     this._type = data.type;
     this._status = data.status;
     this._count = data.count;
+
+    this._onClickFilter = this._onClickFilter.bind(this);
+
+    this._onFilter = null;
+  }
+
+  _onClickFilter() {
+    typeof this._onFilter === `function` && this._onFilter();
+  }
+
+  set onFilter(fn) {
+    this._onFilter = fn;
   }
 
   get template() {
@@ -22,6 +34,16 @@ class FilterView extends AbstractView {
         ${this._type}<span class="filter__all-count">${this._count}</span>
       </label>
     </div>`
+  }
+
+  bind() {
+    this._element.querySelector(`.filter__input`)
+      .addEventListener(`change`, this._onClickFilter);
+  }
+
+  unbind() {
+    this._element.querySelector(`.filter__input`)
+      .removeEventListener(`change`, this._onClickFilter);
   }
 }
 

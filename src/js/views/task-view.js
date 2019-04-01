@@ -9,7 +9,6 @@ class TaskView extends AbstractView {
     this._tags = data.tags;
     this._color = data.color;
     this._dueDate = data.dueDate;
-    console.log(data.dueDate);
     this._repeatingDays = data.repeatingDays;
     this._onEdit = null;
 

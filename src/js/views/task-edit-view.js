@@ -17,11 +17,13 @@ class TaskEditView extends AbstractView {
                                    .some((it) => it[1]);
 
     this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
+    this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
     this._onChangeDate = this._onChangeDate.bind(this);
     this._onChangeRepeated = this._onChangeRepeated.bind(this);
     this._onRemoveTag = this._onRemoveTag.bind(this);
 
     this._onSubmit = null;
+    this._onDelete = null;
   }
 
   _processForm(formData) {
@@ -29,6 +31,8 @@ class TaskEditView extends AbstractView {
       title: ``,
       color: ``,
       tags: new Set(),
+      date: ``,
+      time: ``,
       dueDate: new Date(),
       repeatingDays: {
         'mo': false,
@@ -48,8 +52,6 @@ class TaskEditView extends AbstractView {
       taskEditMapper[property] && taskEditMapper[property](value);
     }
 
-    console.log(entry);
-
     return entry;
   }
 
@@ -61,6 +63,12 @@ class TaskEditView extends AbstractView {
     typeof this._onSubmit === `function` && this._onSubmit(newData);
 
     this.update(newData);
+  }
+
+  _onDeleteButtonClick(evt) {
+    evt.preventDefault();
+
+    typeof this._onDelete === `function` && this._onDelete();
   }
 
   _onChangeDate() {
@@ -87,6 +95,10 @@ class TaskEditView extends AbstractView {
 
   _partialUpdate() {
     this._element.innerHTML = this.template;
+  }
+
+  set onDelete(fn) {
+    this._onDelete = fn;
   }
 
   set onSubmit(fn) {
@@ -131,7 +143,13 @@ class TaskEditView extends AbstractView {
 
                 <fieldset class="card__date-deadline" ${!this._state.isDate && `disabled`}>
                   <label class="card__input-deadline-wrap">
-                    <input class="card__date" type="text" placeholder="23 September" name="date" />
+                    <input
+                      class="card__date"
+                      type="text"
+                      placeholder="23 September"
+                      value=""
+                      name="date"
+                    />
                   </label>
 
                   <label class="card__input-deadline-wrap">
@@ -180,7 +198,7 @@ class TaskEditView extends AbstractView {
               <h3 class="card__colors-title">Color</h3>
               <div class="card__colors-wrap">
                 ${COLORS.map((color) => `
-                  <input type="radio" id="color-${color}-5" class="card__color-input card__color-input--${color} visually-hidden" name="color" value="${color}"/>
+                  <input type="radio" id="color-${color}-5" class="card__color-input card__color-input--${color} visually-hidden" name="color" value="${color}" ${this._color === color && `checked`}/>
                   <label for="color-${color}-5" class="card__color card__color--${color}">${color}</label>`.trim()
                 ).join(``)}
               </div>
@@ -199,6 +217,8 @@ class TaskEditView extends AbstractView {
   bind() {
     this._element.querySelector(`.card__form`)
         .addEventListener(`submit`, this._onSubmitButtonClick);
+    this._element.querySelector(`.card__delete`)
+        .addEventListener(`click`, this._onDeleteButtonClick);
     this._element.querySelector(`.card__date-deadline-toggle`)
         .addEventListener(`click`, this._onChangeDate);
     this._element.querySelector(`.card__repeat-toggle`)
@@ -207,17 +227,15 @@ class TaskEditView extends AbstractView {
         .forEach((it) => it
         .addEventListener(`click`, this._onRemoveTag));
 
-    if (this._state.isDate) {
-      flatpickr(`.card__date`, { altInput: true, altFormat: `j F`, dateFormat: `j F` });
-      flatpickr(`.card__time`, { enableTime: true, noCalendar: true, altInput: true, altFormat: `h:i K`, dateFormat: `h:i K`});
-    }
+    flatpickr(`.card__date`, { altInput: true, altFormat: `j F`, dateFormat: `j F` });
+    flatpickr(`.card__time`, { enableTime: true, noCalendar: true, altInput: true, altFormat: `h:i K`, dateFormat: `h:i K`});
   }
 
   unbind() {
     this._element.querySelector(`.card__form`)
         .removeEventListener(`submit`, this._onSubmitButtonClick);
-    this._element.querySelector(`.card__form`)
-        .removeEventListener(`submit`, this._onSubmitButtonClick);
+    this._element.querySelector(`.card__delete`)
+        .removeEventListener(`click`, this._onDeleteButtonClick);
     this._element.querySelector(`.card__date-deadline-toggle`)
         .removeEventListener(`click`, this._onChangeDate);
     this._element.querySelector(`.card__repeat-toggle`)
@@ -241,8 +259,8 @@ class TaskEditView extends AbstractView {
       text: (value) => target.title = value,
       color: (value) => target.color = value,
       repeat: (value) => target.repeatingDays[value] = true,
-      date: (value) => target.dueDate[value],
-      time: (value) => target.dueDate[value],
+      date: (value) => target.date = value,
+      time: (value) => target.time = value,
     }
   }
 }
